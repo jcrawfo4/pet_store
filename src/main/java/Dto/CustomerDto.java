@@ -23,8 +23,8 @@ public class CustomerDto {
         this.customerFirstName = customer.getCustomerFirstName();
         this.customerLastName = customer.getCustomerLastName();
         this.customerEmail = customer.getCustomerEmail();
-        for(PetStore petStore: customer.getPetStores()){
-            this.petStores.add(petStore);
-        }
+//        for(PetStore petStore: customer.getPetStores()){
+//            this.petStores.add(petStore);
+//        }
     }
 }

@@ -20,7 +20,7 @@ public class PetStoreDto {
     String petStoreZip;
     String petStorePhone;
     Set<EmployeeDto> employees = new HashSet<EmployeeDto>();
-    Set<CustomerDto> customers = new HashSet<CustomerDto>();
+    Set<CustomerDto> customers = new HashSet<>();
 
     public PetStoreDto(PetStore petStore) {
         this.petStoreId = petStore.getPetStoreId();
@@ -31,10 +31,10 @@ public class PetStoreDto {
         this.petStoreZip = petStore.getPetStoreZip();
         this.petStorePhone = petStore.getPetStorePhone();
         for(Employee employee: petStore.getEmployees()){
-            this.employees.add(new EmployeeDto());
+            this.employees.add(new EmployeeDto(employee));
         }
         for(Customer customer: petStore.getCustomers()){
-            this.customers.add(new CustomerDto());
+            this.customers.add(new CustomerDto(customer));
         }
     }
 }
