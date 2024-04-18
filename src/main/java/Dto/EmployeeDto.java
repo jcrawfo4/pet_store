@@ -1,4 +1,4 @@
-package Pet.Store.Controller.Model;
+package Dto;
 
 import Pet.Store.Entity.Employee;
 import Pet.Store.Entity.PetStore;
