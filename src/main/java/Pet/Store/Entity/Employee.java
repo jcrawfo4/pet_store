@@ -1,5 +1,6 @@
 package Pet.Store.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -16,10 +17,13 @@ public class Employee {
     @ToString.Exclude
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "pet_store_id")
+    @JsonBackReference
     PetStore petStore;
 
     String employeeFirstName;
     String employeeLastName;
     String employeePhone;
+
+    @Column(name = "employee_job_title")
     String employeeJobTitle;
 }

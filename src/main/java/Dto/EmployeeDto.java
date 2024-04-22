@@ -5,9 +5,6 @@ import Pet.Store.Entity.PetStore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.HashSet;
-import java.util.Set;
-
 @NoArgsConstructor
 @Data
 public class EmployeeDto {
@@ -26,5 +23,15 @@ public class EmployeeDto {
         this.employeeLastName = employee.getEmployeeLastName();
         this.employeePhone = employee.getEmployeePhone();
         this.employeeJobTitle = employee.getEmployeeJobTitle();
+    }
+
+    public EmployeeDto(Integer employeeId, PetStore petStore, String employeeFirstName, String employeeLastName, String employeePhone, String employeeJobTitle) {
+        Employee employee = new Employee();
+        employee.setEmployeeId(employeeId);
+        employee.setPetStore(petStore);
+        employee.setEmployeeFirstName(employeeFirstName);
+        employee.setEmployeeLastName(employeeLastName);
+        employee.setEmployeePhone(employeePhone);
+        employee.setEmployeeJobTitle(employeeJobTitle);
     }
 }

@@ -30,6 +30,7 @@ public class PetStoreDto {
         this.petStoreState = petStore.getPetStoreState();
         this.petStoreZip = petStore.getPetStoreZip();
         this.petStorePhone = petStore.getPetStorePhone();
+
         for(Employee employee: petStore.getEmployees()){
             this.employees.add(new EmployeeDto(employee));
         }

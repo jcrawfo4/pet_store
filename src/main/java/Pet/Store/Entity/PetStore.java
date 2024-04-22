@@ -1,5 +1,7 @@
 package Pet.Store.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -21,6 +23,7 @@ public class PetStore {
 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
+    @JsonManagedReference
     @OneToMany(mappedBy = "petStore", cascade = CascadeType.ALL, orphanRemoval = true)
     Set<Employee> employees = new HashSet<>();
 
