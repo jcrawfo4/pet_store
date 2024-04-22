@@ -1,7 +1,6 @@
 package Pet.Store.Entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -12,10 +11,12 @@ import java.util.Set;
 
 @Entity
 @Data
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "customerId")
 public class Customer {
 
-    @JsonBackReference("customer-petstore")
-    @EqualsAndHashCode.Exclude
+    @JsonIdentityReference(alwaysAsId = true) // otherwise first ref will be used    @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @ManyToMany(mappedBy = "customers", cascade = CascadeType.PERSIST)
     Set<PetStore> petStores = new HashSet<>();
