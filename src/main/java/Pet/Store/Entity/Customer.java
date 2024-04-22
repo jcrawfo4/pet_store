@@ -1,5 +1,7 @@
 package Pet.Store.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -12,6 +14,7 @@ import java.util.Set;
 @Data
 public class Customer {
 
+    @JsonBackReference("customer-petstore")
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @ManyToMany(mappedBy = "customers", cascade = CascadeType.PERSIST)

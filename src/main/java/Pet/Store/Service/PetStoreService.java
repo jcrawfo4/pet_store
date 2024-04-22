@@ -12,12 +12,12 @@ import Pet.Store.Entity.PetStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.NoSuchElementException;
+
 
 @Service
 public class PetStoreService {
@@ -49,7 +49,7 @@ public class PetStoreService {
     }
 
     private PetStore findOrCreatePetStore(Integer petStoreId) {
-        if(petStoreId == null){
+        if (petStoreId == null) {
             return new PetStore();
         } else {
             return findPetStoreById(petStoreId);
@@ -58,7 +58,7 @@ public class PetStoreService {
 
     private PetStore findPetStoreById(Integer petStoreId) {
         return petStoreDao.findById(petStoreId)
-                .orElseThrow( () -> new NoSuchElementException(
+                .orElseThrow(() -> new NoSuchElementException(
                         "Pet store with ID = " + petStoreId + "was not found"));
     }
 
@@ -68,6 +68,7 @@ public class PetStoreService {
         Integer employeeId = employeeDto.getEmployeeId();
         Employee employee = findOrCreateEmployee(petStoreId, employeeId);
         copyEmployeeFields(employee, employeeDto);
+
         employee.setPetStore(petStore);
         petStore.getEmployees().add(employee);
         Employee databaseEmployee = employeeDao.save(employee);
@@ -84,22 +85,19 @@ public class PetStoreService {
     }
 
     private Employee findOrCreateEmployee(Integer petStoreId, Integer employeeId) {
-        if(employeeId == null){
+        if (employeeId == null) {
             return new Employee();
         } else {
             return findEmployeeById(employeeId, petStoreId);
         }
     }
 
-    private Employee findEmployeeById(Integer employeeId, Integer petStoreId){
-        Employee employee;
-        if(Objects.equals(petStoreId, employeeId)){
-            employee = employeeDao.findById(employeeId)
-                    .orElseThrow( () -> new NoSuchElementException(
-                            "Employee with ID = " + employeeId + "was not found"));
-        }
-        else {
-            throw new IllegalArgumentException("Employee ID must match Pet Store ID");
+    private Employee findEmployeeById(Integer employeeId, Integer petStoreId) {
+        Employee employee = employeeDao.findById(employeeId)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Employee with ID = " + employeeId + "was not found"));
+        if (employee.getPetStore().getPetStoreId() != petStoreId) {
+            throw new IllegalArgumentException("Employee with Id= )" + employeeId + " does not have a relationship with Pet Store with ID = " + petStoreId);
         }
         return employee;
     }
@@ -110,22 +108,14 @@ public class PetStoreService {
         Integer customerId = customerDto.getCustomerId();
         Customer customer = findOrCreateCustomer(petStoreId, customerId);
         copyCustomerFields(customer, customerDto);
-        for(PetStore ps: customer.getPetStores()){
+        for (PetStore ps : customer.getPetStores()) {
             customer.getPetStores().add(ps);
         }
+        customer.getPetStores().add(petStore);
         petStore.getCustomers().add(customer);
         Customer databaseCustomer = customerDao.save(customer);
-        CustomerDto result = new CustomerDto(databaseCustomer);
-        //convert the get list of PetStore objects to a stream
-        Stream<PetStore> petStoreStream = databaseCustomer.getPetStores().stream();
-        //Transform each PetStore object into a PetStoreDto object
-        Stream<PetStoreDto> petStoreDtoStream = petStoreStream.map(PetStoreDto::new);
-        //collect PetStoreDto objects into a list
-        Set<PetStoreDto> petStoreDtoSet = petStoreDtoStream.collect(Collectors.toSet());
-        //set the list of PetStoreDto objects in the result object
-        result.setPetStores(petStoreDtoSet);
-
-        return result;
+        CustomerDto customerAsCustomerDto = new CustomerDto(databaseCustomer);
+        return customerAsCustomerDto;
     }
 
     private void copyCustomerFields(Customer customer, CustomerDto customerDto) {
@@ -136,27 +126,26 @@ public class PetStoreService {
     }
 
     private Customer findOrCreateCustomer(Integer petStoreId, Integer customerId) {
-        if(customerId == null){
+        if (customerId == null) {
             return new Customer();
         } else {
             return findCustomerById(customerId, petStoreId);
         }
     }
-//Note:  that customer and pet store have a many-to-many relationship. This means that a Customer
-// object has a List of PetStore objects. This means that, in the method findCustomerById(), you will
-// need to loop through the list of PetStore objects looking for the pet store with the given pet store ID.
-// If not found, throw an IllegalArgumentException.
+
     private Customer findCustomerById(Integer customerId, Integer petStoreId) {
-        Customer customer = new Customer();
-        for(PetStore petStore: customer.getPetStores()){
-            if(Objects.equals(petStore.getPetStoreId(), customerId)){
-                customer = customerDao.findById(customerId)
-                        .orElseThrow( () -> new NoSuchElementException(
-                                "Customer with ID = " + customerId + "was not found"));
+        Customer customer = customerDao.findById(customerId)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Customer with ID = " + customerId + "was not found"));
+        boolean found = false;
+        for (PetStore ps : customer.getPetStores()) {
+            if (ps.getPetStoreId() == petStoreId) {
+                found = true;
+                break;
             }
-            else {
-                throw new IllegalArgumentException("Customer ID must match Pet Store ID");
-            }
+        }
+        if (!found) {
+            throw new IllegalArgumentException("Customer with Id= )" + customerId + " does not have a relationship with Pet Store with ID = " + petStoreId);
         }
         return customer;
     }
@@ -164,14 +153,16 @@ public class PetStoreService {
 
     @Transactional(readOnly = true)
     public List<PetStoreDto> retrieveAllPetStores() {
-        List<PetStoreDto> petStoreDtos = new LinkedList<>();
-        for(PetStore petStore:  petStoreDao.findAll()){
+
+        List<PetStore> petStores = petStoreDao.findAll();
+        List<PetStoreDto> result = new LinkedList<>();
+        for (PetStore petStore : petStores) {
             PetStoreDto petStoreDto = new PetStoreDto(petStore);
             petStoreDto.getEmployees().clear();
             petStoreDto.getCustomers().clear();
-            petStoreDtos.add(petStoreDto);
+            result.add(petStoreDto);
         }
-        return petStoreDtos;
+        return result;
     }
 
     @Transactional(readOnly = true)

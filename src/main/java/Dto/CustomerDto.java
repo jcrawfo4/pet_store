@@ -1,14 +1,11 @@
 package Dto;
 
 import Pet.Store.Entity.Customer;
-import Pet.Store.Entity.PetStore;
-import Dto.PetStoreDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Data
